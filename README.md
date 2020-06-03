@@ -1,6 +1,13 @@
 # amazon-transactions-to-lunchmoney
 
-Download your Amazon transaction history as a CSV file from https://www.amazon.com/gp/b2b/reports and name it amazon.csv. Put the CSV file in the same folder as this python script. Change YOUR_LUNCH_MONEY_API_KEY_HERE and the start_date and end_date variables as appropriate.
+Download your Amazon transaction history as a CSV file from https://www.amazon.com/gp/b2b/reports and name it amazon.csv. Put the CSV file in the same folder as this python script. 
+
+Run the following python command where YOUR_LUNCH_MONEY_API_KEY_HERE is replaced with your Lunch Money API key:
+```python 
+keyring.set_password(service_id, 'lmauth', 'YOUR_LUNCH_MONEY_API_KEY_HERE')
+```
+
+Change the start_date and end_date variables in the script to match the start and end dates of your Amazon transaction history report.
 
 When the script is run, it will try to match each Amazon transaction in Lunch Money to a transaction in your Amazon transaction history file. If a match is found, the "notes" field of the Lunch Money transaction will be set to title of the transaction item in the Amazon transaction history file.
 
