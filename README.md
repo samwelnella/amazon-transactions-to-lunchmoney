@@ -1,14 +1,10 @@
 # amazon-transactions-to-lunchmoney
 
-Download your Amazon transaction history as a CSV file from https://www.amazon.com/gp/b2b/reports and name it amazon.csv. Put the CSV file in the same folder as this python script. 
+Use the [Amazon Order History Reporter](https://chrome.google.com/webstore/detail/amazon-order-history-repo/mgkilgclilajckgnedgjgnfdokkgnibi?hl=en) Chrome extension to export your Amazon order history to a CSV file. Name the CSV file 'amazon.csv' and store it in the same folder as this plugin.
 
 Run the following python command where YOUR_LUNCH_MONEY_API_KEY_HERE is replaced with your Lunch Money API key:
 ```python 
 keyring.set_password(service_id, 'lmauth', 'YOUR_LUNCH_MONEY_API_KEY_HERE')
 ```
 
-Change the start_date and end_date variables in the script to match the start and end dates of your Amazon transaction history report.
-
 When the script is run, it will try to match each Amazon transaction in Lunch Money to a transaction in your Amazon transaction history file. If a match is found, the "notes" field of the Lunch Money transaction will be set to title of the transaction item in the Amazon transaction history file.
-
-The script attempts to match multi-item orders by combining all orders with the same order ID, adding the totals and concatenating the item titles.
