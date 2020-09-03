@@ -8,6 +8,13 @@ import calendar
 
 service_id = 'AMAZON_TO_LM'
 
+#On first run store the Lunch Money API key in the OS keyring. If this needs to be changed later you can change the API key with keyring.set_password(service_id, 'lmauth', 'YOUR_LUNCH_MONEY_API_KEY_HERE')
+if not keyring.get_password(service_id, 'lmauth'):
+	print('Lunch money API key not found.')
+	apikey = str(input('Please enter your Lunch Money API key for secure storage in your operating system's keyring: '))
+	keyring.set_password(service_id, 'lmauth', apikey)
+	del apikey
+
 today = datetime.today()
 
 print('Time range for transaction import?')
@@ -38,7 +45,7 @@ elif selection == 2:
 elif selection == 3:
 	while True:
 		try:
-			start_date = str(input('\nPlease enter start date [YYYY-MM-DD]:'))
+			start_date = str(input('\nPlease enter start date [YYYY-MM-DD]: '))
 			datetime.fromisoformat(start_date)
 		except ValueError:
 			print('Please format the date correctly')
@@ -47,7 +54,7 @@ elif selection == 3:
 			break
 	while True:
 		try:
-			end_date = str(input('Please enter end date [YYYY-MM-DD]:'))
+			end_date = str(input('Please enter end date [YYYY-MM-DD]: '))
 			datetime.fromisoformat(end_date)
 		except ValueError:
 			print('Please format the date correctly')
@@ -55,10 +62,6 @@ elif selection == 3:
 		else:
 			break
 
-print(start_date)
-print(end_date)
-
-#Set your lmauth variable with keyring.set_password(service_id, 'lmauth', 'YOUR_LUNCH_MONEY_API_KEY_HERE')
 lmauth = keyring.get_password(service_id, 'lmauth')
 headers = {'Authorization': 'Bearer {}'.format(lmauth)}
 del lmauth
@@ -84,9 +87,6 @@ for row in amazon_purchases_single:
 				if timedelta(minutes=-2880) <= datetime.strptime(x['date'], '%Y-%m-%d') - datetime.strptime(payment_parse[1].strip(), '%B %d, %Y') <= timedelta(minutes=2880):
 					transaction_id.append(x['id'])
 					transaction_note.append(row['items'])
-
-print(transaction_id)
-print(transaction_note)
 	
 for x in range(len(transaction_id)):
 	payload = {'transaction': {'notes': transaction_note[x]}}
