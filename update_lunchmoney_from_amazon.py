@@ -2,6 +2,7 @@ import requests
 import csv
 import pandas
 import keyring
+import re
 from datetime import datetime
 from datetime import timedelta
 import calendar
@@ -70,7 +71,7 @@ payload = {'start_date': start_date, 'end_date': end_date}
 
 r = requests.get('https://dev.lunchmoney.app/v1/transactions', params = payload, headers = headers)
 transactions = r.json()
-amazon_transactions = [x for x in transactions['transactions'] if x['payee'] == 'Amazon' or x['payee'] == 'Amazon Prime' or x['payee'] == 'Amazon Marketplace' or x['payee'] == 'AMAZON.COM']
+amazon_transactions = [x for x in transactions['transactions'] if re.match('(?i)Amazon(\s(Prime|Marketplace)|\.\w+)?',x['payee'])]
 print(str(len(amazon_transactions)) + ' Lunch Money Amazon transactions found.')
 
 transaction_id = []
@@ -83,11 +84,11 @@ for row in amazon_purchases_single:
 	for x in amazon_transactions:
 		payment_parse = row['payments'].split(':')
 		if len(payment_parse) == 3:
-			if float(x['amount']) == float(payment_parse[2].replace('$', '').replace(';', '').strip()):
+			if float(x['amount']) == float(re.sub('[^\d\.]+','',payment_parse[2])):
 				if timedelta(minutes=-2880) <= datetime.strptime(x['date'], '%Y-%m-%d') - datetime.strptime(payment_parse[1].strip(), '%B %d, %Y') <= timedelta(minutes=2880):
 					transaction_id.append(x['id'])
 					transaction_note.append(row['items'])
-	
+
 for x in range(len(transaction_id)):
 	payload = {'transaction': {'notes': transaction_note[x]}}
 	r = requests.put("https://dev.lunchmoney.app/v1/transactions/{}".format(transaction_id[x]), json = payload, headers=headers)
