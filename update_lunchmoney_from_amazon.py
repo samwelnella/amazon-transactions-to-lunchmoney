@@ -75,7 +75,7 @@ payload = {'start_date': start_date, 'end_date': end_date}
 
 r = requests.get('https://dev.lunchmoney.app/v1/transactions', params = payload, headers = headers)
 transactions = r.json()
-amazon_transactions = [x for x in transactions['transactions'] if re.match('(?i)Amazon(\s(Prime|Marketplace)|\.\w+)?',x['payee'])]
+amazon_transactions = [x for x in transactions['transactions'] if re.match('(?i)(Amazon|AMZN)(\s(Prime|Marketplace|MKTP)|\.\w+)?',x['payee'])]
 print(str(len(amazon_transactions)) + ' Lunch Money Amazon transactions found.')
 
 transaction_id = []
