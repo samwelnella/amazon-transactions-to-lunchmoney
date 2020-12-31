@@ -2,6 +2,7 @@ import requests
 import csv
 import pandas
 import keyring
+import re
 from datetime import datetime
 from datetime import timedelta
 import calendar
@@ -11,7 +12,7 @@ service_id = 'AMAZON_TO_LM'
 #On first run store the Lunch Money API key in the OS keyring. If this needs to be changed later you can change the API key with keyring.set_password(service_id, 'lmauth', 'YOUR_LUNCH_MONEY_API_KEY_HERE')
 if not keyring.get_password(service_id, 'lmauth'):
 	print('Lunch money API key not found.')
-	apikey = str(input('Please enter your Lunch Money API key for secure storage in your operating system's keyring: '))
+	apikey = str(input('Please enter your Lunch Money API key for secure storage in your operating system\'s keyring: '))
 	keyring.set_password(service_id, 'lmauth', apikey)
 	del apikey
 
@@ -70,7 +71,7 @@ payload = {'start_date': start_date, 'end_date': end_date}
 
 r = requests.get('https://dev.lunchmoney.app/v1/transactions', params = payload, headers = headers)
 transactions = r.json()
-amazon_transactions = [x for x in transactions['transactions'] if x['payee'] == 'Amazon' or x['payee'] == 'Amazon Prime' or x['payee'] == 'Amazon Marketplace' or x['payee'] == 'AMAZON.COM']
+amazon_transactions = [x for x in transactions['transactions'] if re.match('(?i)Amazon(\s(Prime|Marketplace)|\.\w+)?',x['payee'])]
 print(str(len(amazon_transactions)) + ' Lunch Money Amazon transactions found.')
 
 transaction_id = []
@@ -83,11 +84,11 @@ for row in amazon_purchases_single:
 	for x in amazon_transactions:
 		payment_parse = row['payments'].split(':')
 		if len(payment_parse) == 3:
-			if float(x['amount']) == float(payment_parse[2].replace('$', '').replace(';', '').strip()):
+			if float(x['amount']) == float(re.sub('[^\d\.]+','',payment_parse[2])):
 				if timedelta(minutes=-2880) <= datetime.strptime(x['date'], '%Y-%m-%d') - datetime.strptime(payment_parse[1].strip(), '%B %d, %Y') <= timedelta(minutes=2880):
 					transaction_id.append(x['id'])
 					transaction_note.append(row['items'])
-	
+
 for x in range(len(transaction_id)):
 	payload = {'transaction': {'notes': transaction_note[x]}}
 	r = requests.put("https://dev.lunchmoney.app/v1/transactions/{}".format(transaction_id[x]), json = payload, headers=headers)
