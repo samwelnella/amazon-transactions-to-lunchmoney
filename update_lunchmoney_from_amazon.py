@@ -6,6 +6,7 @@ import re
 from datetime import datetime
 from datetime import timedelta
 import calendar
+import pry
 
 service_id = 'AMAZON_TO_LM'
 
@@ -75,7 +76,7 @@ payload = {'start_date': start_date, 'end_date': end_date}
 
 r = requests.get('https://dev.lunchmoney.app/v1/transactions', params = payload, headers = headers)
 transactions = r.json()
-amazon_transactions = [x for x in transactions['transactions'] if re.match('(?i)(Amazon|AMZN)(\s(Prime|Marketplace|MKTP)|\.\w+)?',x['payee'])]
+amazon_transactions = [x for x in transactions['transactions'] if re.match('(?i)(Amazon|AMZN)(\s?(Prime|Marketplace|MKTP)|\.\w+)?',x['payee'])]
 print(str(len(amazon_transactions)) + ' Lunch Money Amazon transactions found.')
 
 transaction_id = []
@@ -86,8 +87,16 @@ amazon_purchases_single = csv.DictReader(open('amazon.csv', encoding='utf-8'))
 #Repeat without combining items to get items where Amazon did not combine items in the same order ID in one transaction
 for row in amazon_purchases_single:
 	for x in amazon_transactions:
-		payment_parse = row['payments'].split(':')
-		if len(payment_parse) == 3:
+		if re.match('UNKNOWN',row['payments']):
+			payment_parse = row['total']
+		else:
+			payment_parse = row['payments'].split(':')
+		if type(payment_parse) == str and payment_parse != '':
+			if float(x['amount']) == float(re.sub('[^\d\.]+','',payment_parse)):
+				if timedelta(minutes=-2880) <= datetime.strptime(x['date'], '%Y-%m-%d') - datetime.strptime(row['date'], '%Y-%m-%d') <= timedelta(minutes=2880):
+					transaction_id.append(x['id'])
+					transaction_note.append(row['items'])
+		elif type(payment_parse) == list and len(payment_parse) == 3:
 			if float(x['amount']) == float(re.sub('[^\d\.]+','',payment_parse[2])):
 				if timedelta(minutes=-2880) <= datetime.strptime(x['date'], '%Y-%m-%d') - datetime.strptime(payment_parse[1].strip(), '%B %d, %Y') <= timedelta(minutes=2880):
 					transaction_id.append(x['id'])
