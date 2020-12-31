@@ -20,7 +20,8 @@ today = datetime.today()
 print('Time range for transaction import?')
 print('\n1) This month')
 print('2) Last month')
-print('3) Custom range\n')
+print('3) All time')
+print('4) Custom range\n')
 
 while True:
 	try:
@@ -28,7 +29,7 @@ while True:
 	except ValueError:
 		print('Please pick a valid choice')
 		continue
-	if not 0 < selection < 4:
+	if not 0 < selection < 5:
 		print('Please pick a valid choice')
 		continue
 	else:
@@ -43,6 +44,9 @@ elif selection == 2:
 	end_date = today.date().replace(day=1)- timedelta(days=1)
 	end_date = str(end_date.isoformat())
 elif selection == 3:
+	start_date = str(datetime.fromisoformat('1994-07-05'))
+	end_date = str(today.date().isoformat())
+elif selection == 4:
 	while True:
 		try:
 			start_date = str(input('\nPlease enter start date [YYYY-MM-DD]: '))
