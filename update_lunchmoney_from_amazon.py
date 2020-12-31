@@ -11,7 +11,7 @@ service_id = 'AMAZON_TO_LM'
 #On first run store the Lunch Money API key in the OS keyring. If this needs to be changed later you can change the API key with keyring.set_password(service_id, 'lmauth', 'YOUR_LUNCH_MONEY_API_KEY_HERE')
 if not keyring.get_password(service_id, 'lmauth'):
 	print('Lunch money API key not found.')
-	apikey = str(input('Please enter your Lunch Money API key for secure storage in your operating system's keyring: '))
+	apikey = str(input('Please enter your Lunch Money API key for secure storage in your operating system\'s keyring: '))
 	keyring.set_password(service_id, 'lmauth', apikey)
 	del apikey
 
